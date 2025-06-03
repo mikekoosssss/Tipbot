@@ -1,425 +1,339 @@
 # Community Tipbot Configuration Guide
 
-This guide explains all configuration options for the Community Tipbot.
+## 📋 Configuration Overview
 
-## Configuration File Structure
+The Community Tipbot uses a JSON configuration file located at `config/config.json`. This file contains all the settings needed to run your tipbot.
 
-The main configuration is stored in `config/config.json`. Here's a detailed breakdown of each section:
+## 🚀 Quick Configuration
 
-## Bot Configuration
+Use the configuration helper script:
+
+```bash
+python3 configure_bot.py
+```
+
+This interactive script will guide you through the essential settings.
+
+## 📝 Manual Configuration
+
+### 1. Copy Example Configuration
+
+```bash
+cp config/config.example.json config/config.json
+```
+
+### 2. Edit Configuration File
+
+Open `config/config.json` in your favorite text editor and configure the following sections:
+
+## 🤖 Bot Configuration
 
 ```json
 {
   "bot": {
     "token": "YOUR_BOT_TOKEN_HERE",
-    "name": "Community Tipbot",
     "admin_users": [123456789],
     "allowed_groups": [],
     "cooldown_seconds": 30,
     "max_tip_amount": 1000000,
-    "min_tip_amount": 0.001
+    "min_tip_amount": 0.01
   }
 }
 ```
 
-### Bot Settings
+### Bot Settings Explained:
 
-- **token**: Your Telegram bot token from @BotFather
-- **name**: Display name for the bot
-- **admin_users**: Array of Telegram user IDs with admin privileges
-- **allowed_groups**: Array of group IDs where bot can operate (empty = all groups)
+- **token**: Your Telegram bot token from [@BotFather](https://t.me/BotFather)
+- **admin_users**: Array of Telegram user IDs who have admin access
+- **allowed_groups**: Array of group chat IDs where bot can operate (empty = all groups)
 - **cooldown_seconds**: Minimum time between commands per user
-- **max_tip_amount**: Maximum amount that can be tipped in one transaction
+- **max_tip_amount**: Maximum amount that can be tipped in a single transaction
 - **min_tip_amount**: Minimum amount that can be tipped
 
-## Feature Toggles
+### Getting Your Bot Token:
 
-```json
-{
-  "features": {
-    "tipping": true,
-    "rain": true,
-    "airdrops": true,
-    "withdrawals": true,
-    "deposits": true,
-    "backup": true
-  }
-}
-```
+1. Message [@BotFather](https://t.me/BotFather) on Telegram
+2. Send `/newbot`
+3. Choose a name and username for your bot
+4. Copy the token provided
 
-### Feature Controls
+### Finding Your User ID:
 
-- **tipping**: Enable/disable tip functionality
-- **rain**: Enable/disable rain distribution
-- **airdrops**: Enable/disable airdrop events
-- **withdrawals**: Enable/disable coin withdrawals
-- **deposits**: Enable/disable deposit detection
-- **backup**: Enable/disable wallet backup feature
+1. Message [@userinfobot](https://t.me/userinfobot) on Telegram
+2. Your user ID will be displayed
 
-## Coin Configuration
+## 💰 Coin Configuration
 
 ```json
 {
   "coins": {
     "AEGS": {
+      "name": "Aegisum",
       "enabled": true,
-      "cli_path": "aegisum-cli",
-      "decimals": 8,
-      "min_confirmations": 3,
-      "withdrawal_fee": 0.001,
-      "network_fee": 0.0001,
+      "cli_path": "/usr/local/bin/aegisum-cli",
       "rpc_host": "127.0.0.1",
       "rpc_port": 8332,
       "rpc_user": "aegisumrpc",
-      "rpc_password": "your_rpc_password"
+      "rpc_password": "your_rpc_password",
+      "decimals": 8,
+      "withdrawal_fee": 0.001,
+      "network_fee": 0.0001,
+      "min_confirmations": 3,
+      "explorer_url": "https://explorer.aegisum.com/tx/"
     }
   }
 }
 ```
 
-### Coin Settings
+### Coin Settings Explained:
 
-- **enabled**: Whether this coin is active
+- **name**: Full name of the cryptocurrency
+- **enabled**: Whether this coin is active in the bot
 - **cli_path**: Path to the coin's CLI executable
-- **decimals**: Number of decimal places for the coin
-- **min_confirmations**: Required confirmations for deposits
-- **withdrawal_fee**: Fee charged for withdrawals
-- **network_fee**: Default network transaction fee
 - **rpc_host**: RPC server host (usually localhost)
 - **rpc_port**: RPC server port
 - **rpc_user**: RPC username
-- **rpc_password**: RPC password
+- **rpc_password**: RPC password (generate a strong one)
+- **decimals**: Number of decimal places for the coin
+- **withdrawal_fee**: Fee charged by the bot for withdrawals
+- **network_fee**: Network transaction fee
+- **min_confirmations**: Required confirmations for deposits
+- **explorer_url**: Block explorer URL for transaction links
 
-## Database Configuration
+### Supported Coins:
+
+The bot comes pre-configured for:
+- **AEGS** (Aegisum) - Port 8332
+- **SHIC** (ShibaCoin) - Port 8333
+- **PEPE** (PepeCoin) - Port 8334
+- **ADVC** (AdvCoin) - Port 8335
+
+## 🎛️ Feature Configuration
 
 ```json
 {
-  "database": {
-    "path": "data/tipbot.db"
+  "features": {
+    "tips": true,
+    "rain": true,
+    "airdrops": true,
+    "withdrawals": true,
+    "deposits": true,
+    "backup": true,
+    "multi_coin": true
   }
 }
 ```
 
-### Database Settings
+### Feature Settings:
 
-- **path**: Path to SQLite database file
+- **tips**: Enable/disable tipping functionality
+- **rain**: Enable/disable rain (distribute to active users)
+- **airdrops**: Enable/disable airdrop functionality
+- **withdrawals**: Enable/disable withdrawals to external addresses
+- **deposits**: Enable/disable deposit functionality
+- **backup**: Enable/disable wallet backup feature
+- **multi_coin**: Enable/disable multi-coin support
 
-## Security Configuration
+## 🌧️ Rain Configuration
+
+```json
+{
+  "rain": {
+    "min_active_users": 3,
+    "activity_window_minutes": 60,
+    "min_amount": 1.0,
+    "max_recipients": 50
+  }
+}
+```
+
+### Rain Settings:
+
+- **min_active_users**: Minimum users needed for rain
+- **activity_window_minutes**: Time window to consider users active
+- **min_amount**: Minimum amount for rain
+- **max_recipients**: Maximum number of rain recipients
+
+## 🎁 Airdrop Configuration
+
+```json
+{
+  "airdrops": {
+    "max_duration_minutes": 60,
+    "min_amount": 10.0,
+    "max_participants": 100
+  }
+}
+```
+
+### Airdrop Settings:
+
+- **max_duration_minutes**: Maximum airdrop duration
+- **min_amount**: Minimum amount for airdrops
+- **max_participants**: Maximum airdrop participants
+
+## 🔐 Security Configuration
 
 ```json
 {
   "security": {
     "encryption_key": "GENERATE_RANDOM_KEY_HERE",
-    "backup_encryption": true,
-    "require_backup_confirmation": true
+    "wallet_backup_encryption": true,
+    "require_confirmation": true,
+    "max_daily_withdrawal": 10000
   }
 }
 ```
 
-### Security Settings
+### Security Settings:
 
-- **encryption_key**: Fernet encryption key for wallet backups
-- **backup_encryption**: Whether to encrypt wallet backups
-- **require_backup_confirmation**: Require user confirmation for backups
+- **encryption_key**: Key for encrypting sensitive data (auto-generated)
+- **wallet_backup_encryption**: Encrypt wallet backups
+- **require_confirmation**: Require confirmation for large transactions
+- **max_daily_withdrawal**: Maximum daily withdrawal per user
 
-## Notification Settings
-
-```json
-{
-  "notifications": {
-    "pending_tx": true,
-    "confirmed_tx": true,
-    "deposit_detected": true,
-    "withdrawal_sent": true
-  }
-}
-```
-
-### Notification Controls
-
-- **pending_tx**: Send notifications for pending transactions
-- **confirmed_tx**: Send notifications when transactions confirm
-- **deposit_detected**: Notify users of new deposits
-- **withdrawal_sent**: Notify users when withdrawals are sent
-
-## Admin Dashboard Configuration
+## 🖥️ Admin Dashboard Configuration
 
 ```json
 {
   "admin_dashboard": {
     "enabled": true,
-    "port": 12000,
     "host": "0.0.0.0",
-    "username": "admin",
-    "password": "change_this_password"
+    "port": 12000,
+    "password": "your_admin_password",
+    "session_timeout": 3600
   }
 }
 ```
 
-### Dashboard Settings
+### Dashboard Settings:
 
-- **enabled**: Whether admin dashboard is active
-- **port**: Port for web dashboard
-- **host**: Host binding (0.0.0.0 for all interfaces)
-- **username**: Admin login username
+- **enabled**: Enable/disable admin dashboard
+- **host**: Dashboard host (0.0.0.0 for all interfaces)
+- **port**: Dashboard port
 - **password**: Admin login password
+- **session_timeout**: Session timeout in seconds
 
-## Environment Variables
-
-You can override configuration values using environment variables:
-
-```bash
-export TIPBOT_TOKEN="your_bot_token"
-export TIPBOT_ADMIN_PASSWORD="secure_password"
-export TIPBOT_ENCRYPTION_KEY="your_encryption_key"
-```
-
-## Advanced Configuration
-
-### Custom Coin Addition
-
-To add a new coin, add it to the coins section:
+## 📊 Database Configuration
 
 ```json
 {
-  "NEWCOIN": {
-    "enabled": true,
-    "cli_path": "newcoin-cli",
-    "decimals": 8,
-    "min_confirmations": 6,
-    "withdrawal_fee": 0.01,
-    "network_fee": 0.001,
-    "rpc_host": "127.0.0.1",
-    "rpc_port": 8336,
-    "rpc_user": "newcoinrpc",
-    "rpc_password": "password"
+  "database": {
+    "path": "data/tipbot.db",
+    "backup_interval_hours": 24,
+    "max_backups": 7
   }
 }
 ```
 
-### Rate Limiting
+### Database Settings:
 
-Configure rate limiting per user:
+- **path**: SQLite database file path
+- **backup_interval_hours**: Automatic backup interval
+- **max_backups**: Maximum number of backups to keep
 
-```json
-{
-  "rate_limiting": {
-    "tips_per_hour": 10,
-    "rain_per_day": 3,
-    "withdrawals_per_day": 5
-  }
-}
-```
+## 📝 Logging Configuration
 
-### Group Restrictions
-
-Restrict bot to specific groups:
-
-```json
-{
-  "bot": {
-    "allowed_groups": [-1001234567890, -1001234567891]
-  }
-}
-```
-
-### Fee Structures
-
-Configure dynamic fees:
-
-```json
-{
-  "coins": {
-    "AEGS": {
-      "fee_structure": {
-        "type": "percentage",
-        "rate": 0.001,
-        "min_fee": 0.0001,
-        "max_fee": 0.01
-      }
-    }
-  }
-}
-```
-
-## Configuration Validation
-
-The bot validates configuration on startup. Common validation errors:
-
-### Missing Required Fields
-```
-Error: Bot token is required
-Error: CLI path required for coin AEGS
-```
-
-### Invalid Values
-```
-Error: Decimals must be integer for coin AEGS
-Error: admin_users must be a list
-```
-
-### Network Issues
-```
-Error: Cannot connect to AEGS daemon
-Error: RPC authentication failed for SHIC
-```
-
-## Configuration Management
-
-### Backup Configuration
-```bash
-cp config/config.json config/config.json.backup
-```
-
-### Validate Configuration
-```bash
-python3 -c "
-import json
-with open('config/config.json') as f:
-    config = json.load(f)
-print('Configuration is valid JSON')
-"
-```
-
-### Update Configuration
-1. Stop the bot service
-2. Edit configuration file
-3. Validate changes
-4. Restart bot service
-
-```bash
-sudo systemctl stop community-tipbot
-nano config/config.json
-sudo systemctl start community-tipbot
-```
-
-## Security Best Practices
-
-### Encryption Key Generation
-```bash
-python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-```
-
-### Secure Password Generation
-```bash
-openssl rand -base64 32
-```
-
-### File Permissions
-```bash
-chmod 600 config/config.json
-chown tipbot:tipbot config/config.json
-```
-
-## Monitoring Configuration
-
-### Log Levels
 ```json
 {
   "logging": {
     "level": "INFO",
     "file": "logs/bot.log",
-    "max_size": "10MB",
+    "max_size_mb": 10,
     "backup_count": 5
   }
 }
 ```
 
-### Health Checks
-```json
-{
-  "health_checks": {
-    "enabled": true,
-    "interval": 60,
-    "endpoints": [
-      "http://localhost:8332",
-      "http://localhost:8333"
-    ]
-  }
-}
-```
+### Logging Settings:
 
-## Troubleshooting Configuration
+- **level**: Log level (DEBUG, INFO, WARNING, ERROR)
+- **file**: Log file path
+- **max_size_mb**: Maximum log file size
+- **backup_count**: Number of log files to keep
 
-### Common Issues
+## 🔧 Advanced Configuration
 
-1. **Invalid JSON**: Use a JSON validator
-2. **Wrong file paths**: Ensure paths are relative to bot directory
-3. **Permission errors**: Check file ownership and permissions
-4. **Network connectivity**: Verify RPC settings and daemon status
+### Environment Variables
 
-### Debug Mode
-```json
-{
-  "debug": {
-    "enabled": true,
-    "log_level": "DEBUG",
-    "log_sql": true
-  }
-}
-```
+You can override configuration values using environment variables:
 
-### Configuration Testing
 ```bash
-# Test configuration
-python3 src/test_config.py
-
-# Test coin connectivity
-python3 src/test_coins.py
-
-# Test database connection
-python3 src/test_database.py
+export TIPBOT_BOT_TOKEN="your_bot_token"
+export TIPBOT_ADMIN_PASSWORD="your_admin_password"
+export TIPBOT_AEGS_RPC_PASSWORD="aegs_rpc_password"
 ```
 
-## Configuration Templates
+### Configuration Validation
 
-### Minimal Configuration
-```json
-{
-  "bot": {
-    "token": "YOUR_TOKEN",
-    "admin_users": [YOUR_USER_ID]
-  },
-  "coins": {
-    "AEGS": {
-      "enabled": true,
-      "cli_path": "aegisum-cli"
-    }
-  },
-  "features": {
-    "tipping": true
-  }
-}
+The bot validates configuration on startup. Common issues:
+
+1. **Invalid bot token**: Check token format
+2. **RPC connection failed**: Verify wallet daemon is running
+3. **Invalid user IDs**: Ensure admin_users contains valid Telegram user IDs
+4. **Port conflicts**: Ensure ports are not in use by other services
+
+### Testing Configuration
+
+Test your configuration:
+
+```bash
+# Test bot connection
+python3 -c "
+import sys
+sys.path.append('src')
+from bot import CommunityTipBot
+bot = CommunityTipBot()
+print('Configuration loaded successfully!')
+"
+
+# Test wallet connections
+python3 -c "
+import sys
+sys.path.append('src')
+from wallet_manager import WalletManager
+import asyncio
+
+async def test():
+    wm = WalletManager('config/config.json')
+    for coin in ['AEGS', 'SHIC', 'PEPE', 'ADVC']:
+        try:
+            info = await wm.get_wallet_info(coin)
+            print(f'{coin}: Connected ✅')
+        except Exception as e:
+            print(f'{coin}: Failed ❌ - {e}')
+
+asyncio.run(test())
+"
 ```
 
-### Production Configuration
-```json
-{
-  "bot": {
-    "token": "YOUR_TOKEN",
-    "admin_users": [YOUR_USER_ID],
-    "cooldown_seconds": 10,
-    "max_tip_amount": 100000
-  },
-  "coins": {
-    "AEGS": {
-      "enabled": true,
-      "cli_path": "aegisum-cli",
-      "min_confirmations": 6,
-      "withdrawal_fee": 0.001
-    }
-  },
-  "features": {
-    "tipping": true,
-    "rain": true,
-    "withdrawals": true
-  },
-  "security": {
-    "encryption_key": "SECURE_KEY",
-    "backup_encryption": true
-  }
-}
-```
+## 🚨 Security Best Practices
+
+1. **Use strong RPC passwords** (32+ characters)
+2. **Restrict RPC access** to localhost only
+3. **Regular backups** of wallets and database
+4. **Monitor logs** for suspicious activity
+5. **Update regularly** to get security fixes
+6. **Use HTTPS** for admin dashboard in production
+7. **Firewall configuration** to restrict access
+
+## 🔄 Configuration Updates
+
+When updating configuration:
+
+1. **Stop the bot**: `./manage_bot.sh stop`
+2. **Edit configuration**: `nano config/config.json`
+3. **Validate changes**: Run test commands above
+4. **Restart bot**: `./manage_bot.sh start`
+
+## 📞 Support
+
+If you need help with configuration:
+
+1. Check the logs: `./manage_bot.sh logs`
+2. Verify wallet status: `~/wallets/wallet_info.sh`
+3. Test individual components
+4. Join the Aegisum community for support
 
 ---
 *Powered By Aegisum EcoSystem*
