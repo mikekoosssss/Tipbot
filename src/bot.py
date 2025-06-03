@@ -746,6 +746,59 @@ class CommunityTipBot:
             parse_mode='Markdown'
         )
     
+    async def donate_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /donate command"""
+        user_id = update.effective_user.id
+        
+        if len(context.args) < 2:
+            await update.message.reply_text(
+                "❌ Usage: `/donate <coin> <amount>`\n\n"
+                "Example: `/donate AEGS 10`\n\n"
+                "Donations support the community and development.\n\n"
+                f"{get_powered_by_text()}"
+            )
+            return
+        
+        coin_symbol = context.args[0].upper()
+        
+        try:
+            amount = float(context.args[1])
+        except ValueError:
+            await update.message.reply_text(
+                "❌ Invalid amount. Please enter a valid number.\n\n"
+                f"{get_powered_by_text()}"
+            )
+            return
+        
+        # Validate coin
+        if coin_symbol not in self.config['coins'] or not self.config['coins'][coin_symbol]['enabled']:
+            await update.message.reply_text(
+                f"❌ Unsupported coin: {coin_symbol}\n\n"
+                f"Supported coins: {', '.join([c for c in self.config['coins'] if self.config['coins'][c]['enabled']])}\n\n"
+                f"{get_powered_by_text()}"
+            )
+            return
+        
+        # Check balance
+        balance = await self.wallet_manager.get_balance(user_id, coin_symbol)
+        if balance < amount:
+            await update.message.reply_text(
+                f"❌ Insufficient balance. You have {format_amount(balance, self.config['coins'][coin_symbol]['decimals'])} {coin_symbol}\n\n"
+                f"{get_powered_by_text()}"
+            )
+            return
+        
+        # For now, just show a thank you message (donation address would be configured)
+        formatted_amount = format_amount(amount, self.config['coins'][coin_symbol]['decimals'])
+        await update.message.reply_text(
+            f"💝 **Thank you for your donation!**\n\n"
+            f"💰 Amount: {formatted_amount} {coin_symbol}\n\n"
+            f"🚧 Donation feature is being finalized.\n"
+            f"Your generous contribution will support the community!\n\n"
+            f"{get_powered_by_text()}",
+            parse_mode='Markdown'
+        )
+    
     async def message_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle regular messages for activity tracking"""
         user_id = update.effective_user.id
@@ -770,6 +823,7 @@ class CommunityTipBot:
         self.application.add_handler(CommandHandler("top", self.top_command))
         self.application.add_handler(CommandHandler("fees", self.fees_command))
         self.application.add_handler(CommandHandler("airdrop", self.airdrop_command))
+        self.application.add_handler(CommandHandler("donate", self.donate_command))
         
         # Message handler for activity tracking
         self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.message_handler))
