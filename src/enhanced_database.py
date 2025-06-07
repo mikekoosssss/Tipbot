@@ -904,3 +904,89 @@ class EnhancedDatabase:
         except Exception as e:
             logger.error(f"Failed to get system stats: {e}")
             return {}
+    
+    def get_last_faucet_claim(self, user_id: int) -> Optional[float]:
+        """Get timestamp of last faucet claim"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT timestamp FROM faucet_claims 
+                WHERE user_id = ? 
+                ORDER BY timestamp DESC LIMIT 1
+            """, (user_id,))
+            
+            result = cursor.fetchone()
+            conn.close()
+            
+            return result[0] if result else None
+            
+        except Exception as e:
+            logger.error(f"Error getting last faucet claim: {e}")
+            return None
+    
+    def record_faucet_claim(self, user_id: int):
+        """Record a faucet claim"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                INSERT INTO faucet_claims (user_id, amount, coin, timestamp)
+                VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+            """, (user_id, 0.0, "MIXED"))
+            
+            # Update user stats
+            cursor.execute("""
+                UPDATE users SET faucet_claims = faucet_claims + 1
+                WHERE user_id = ?
+            """, (user_id,))
+            
+            conn.commit()
+            conn.close()
+            
+        except Exception as e:
+            logger.error(f"Error recording faucet claim: {e}")
+    
+    def get_user_stats(self, user_id: int) -> dict:
+        """Get user statistics for the new bot"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Get basic user info
+            cursor.execute("""
+                SELECT tips_sent, tips_received, rain_participated, 
+                       faucet_claims, dice_games, referrals
+                FROM users WHERE user_id = ?
+            """, (user_id,))
+            
+            result = cursor.fetchone()
+            if not result:
+                conn.close()
+                return {}
+            
+            stats = {
+                'tips_sent': result[0] or 0,
+                'tips_received': result[1] or 0,
+                'rain_participated': result[2] or 0,
+                'faucet_claims': result[3] or 0,
+                'dice_games': result[4] or 0,
+                'referrals': result[5] or 0
+            }
+            
+            # Calculate days active
+            cursor.execute("""
+                SELECT COUNT(DISTINCT DATE(last_active)) FROM users 
+                WHERE user_id = ? AND last_active IS NOT NULL
+            """, (user_id,))
+            result = cursor.fetchone()
+            stats['days_active'] = result[0] if result else 0
+            
+            conn.close()
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Error getting user stats: {e}")
+            return {}

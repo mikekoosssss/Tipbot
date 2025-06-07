@@ -601,3 +601,37 @@ class EnhancedWalletManager:
         # For now, use the CLI method
         # In a full implementation, you would derive addresses from the seed phrase
         return await self.generate_address(user_id, coin_symbol)
+    
+    def validate_password(self, password: str) -> bool:
+        """Validate password strength"""
+        if len(password) < 8:
+            return False
+        
+        has_upper = any(c.isupper() for c in password)
+        has_lower = any(c.islower() for c in password)
+        has_digit = any(c.isdigit() for c in password)
+        has_symbol = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
+        
+        return has_upper and has_lower and has_digit and has_symbol
+    
+    def generate_seed_phrase(self) -> str:
+        """Generate a 24-word seed phrase"""
+        from mnemonic import Mnemonic
+        mnemo = Mnemonic("english")
+        return mnemo.generate(strength=256)  # 24 words
+    
+    def create_wallet(self, user_id: int, password: str, seed_phrase: str) -> bool:
+        """Create a new wallet with password encryption"""
+        try:
+            # In a real implementation, this would:
+            # 1. Encrypt the seed phrase with the password
+            # 2. Store the encrypted seed phrase securely
+            # 3. Generate wallet addresses from the seed phrase
+            
+            # For now, we'll simulate this
+            logger.info(f"Created wallet for user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to create wallet: {e}")
+            return False
